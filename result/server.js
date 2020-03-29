@@ -47,7 +47,7 @@ async.retry(
 
 function getVotes(client) {
   client.query(
-    'SELECT vote1, COUNT(id) AS count FROM votes GROUP BY vote1',
+    'SELECT vote1, questionid, COUNT(id) AS count FROM votes GROUP BY vote1, questionid ',
     [],
     function(err, result) {
       if (err) {

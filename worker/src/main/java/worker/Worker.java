@@ -18,10 +18,12 @@ class Worker {
         JSONObject voteData = new JSONObject(voteJSON);
         String voterID = voteData.getString("voter_id");
         String vote = voteData.getString("vote");
+        String questionid = voteData.getString("questionid");
 
-        System.err.printf("Processing vote for '%s' by '%s'\n", vote, voterID);
+        System.err.printf("Processing vote for '%s' by '%s' for question '%s'\n", vote, voterID,questionid);
         System.err.printf("Processing vote Hello World \n");
-        updateVote(dbConn, voterID, vote);
+
+        updateVote(dbConn, voterID, vote, questionid);
       }
     } catch (SQLException e) {
       e.printStackTrace();
@@ -29,14 +31,18 @@ class Worker {
     }
   }
 
-  static void updateVote(Connection dbConn, String voterID, String vote) throws SQLException {
+  static void updateVote(Connection dbConn, String voterID, String vote, String questionid) throws SQLException {
+
     PreparedStatement insert = dbConn.prepareStatement(
-      "INSERT INTO votes (id, vote1) VALUES (?, ?)");
+      "INSERT INTO votes (id, vote1, questionid) VALUES (?, ?, ?)");
     insert.setString(1, voterID);
     insert.setString(2, vote);
+    insert.setString(3, questionid);
 
     try {
       insert.executeUpdate();
+      System.err.println("insertion successful!!!");
+
     } catch (SQLException e) {
       System.err.printf("You cannot change your vote \n");
     }
@@ -77,7 +83,7 @@ class Worker {
       }
 
       PreparedStatement st = conn.prepareStatement(
-        "CREATE TABLE IF NOT EXISTS votes (id VARCHAR(255) NOT NULL UNIQUE, vote1 VARCHAR(255) NOT NULL)");
+        "CREATE TABLE IF NOT EXISTS votes (id VARCHAR(255) NOT NULL UNIQUE, vote1 VARCHAR(255) NOT NULL, questionid VARCHAR(5) NOT NULL)");
       st.executeUpdate();
 
     } catch (ClassNotFoundException e) {
@@ -85,7 +91,7 @@ class Worker {
       System.exit(1);
     }
     System.err.println("Hello World 1");
-    System.err.println("Connected to db");
+    System.err.println("----Connected to db by creating new postgres db------");
     return conn;
   }
 

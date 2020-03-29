@@ -25,7 +25,7 @@ namespace Worker
                 var keepAliveCommand = pgsql.CreateCommand();
                 keepAliveCommand.CommandText = "SELECT 1";
 
-                var definition = new { vote = "", voter_id = "" };
+                var definition = new { vote = "", voter_id = "", questionid = "" };
                 while (true)
                 {
                     // Slow down to prevent CPU spike, only query each 100ms
@@ -41,7 +41,7 @@ namespace Worker
                     if (json != null)
                     {
                         var vote = JsonConvert.DeserializeAnonymousType(json, definition);
-                        Console.WriteLine($"Processing vote for '{vote.vote}' by '{vote.voter_id}'");
+                        Console.WriteLine($"Processing vote for '{vote.vote}' by '{vote.voter_id}' '{vote.questionid}'");
                          Console.WriteLine("helllo world ");
                         // Reconnect DB if down
                         if (!pgsql.State.Equals(System.Data.ConnectionState.Open))
@@ -51,7 +51,7 @@ namespace Worker
                         }
                         else
                         { // Normal +1 vote requested
-                            UpdateVote(pgsql, vote.voter_id, vote.vote);
+                            UpdateVote(pgsql, vote.voter_id, vote.vote, vote.questionid);
                         }
                     }
                     else
@@ -91,16 +91,19 @@ namespace Worker
                 }
             }
 
-            Console.Error.WriteLine("Connected to db");
-            Console.Error.WriteLine("Hello World");
+            Console.Error.WriteLine("Connected to db PgSql");
+            Console.Error.WriteLine("Will implement create table command");
 
             var command = connection.CreateCommand();
             command.CommandText = @"CREATE TABLE votes (
                                         id VARCHAR(255) NOT NULL UNIQUE,
-                                        vote1 VARCHAR(255) NOT NULL
+                                        vote1 VARCHAR(255) NOT NULL,
+                                        questionid VARCHAR(5) NOT NULL
                                     )";
             command.ExecuteNonQuery();
-
+            
+            Console.Error.WriteLine("--------Creation of table successful!!!----------");
+            
             return connection;
         }
 
@@ -133,14 +136,16 @@ namespace Worker
                 .First(a => a.AddressFamily == AddressFamily.InterNetwork)
                 .ToString();
 
-        private static void UpdateVote(NpgsqlConnection connection, string voterId, string vote)
+        private static void UpdateVote(NpgsqlConnection connection, string voterId, string vote, string questionid)
         {
             var command = connection.CreateCommand();
             try
             {
-                command.CommandText = "INSERT INTO votes (id, vote1) VALUES (@id, @vote)";
+                command.CommandText = "INSERT INTO votes (id, vote1, questionid) VALUES (@id, @vote, @questionid)";
                 command.Parameters.AddWithValue("@id", voterId);
                 command.Parameters.AddWithValue("@vote", vote);
+                command.Parameters.AddWithValue("@questionid", questionid);
+
                 command.ExecuteNonQuery();
             }
             catch (DbException)
