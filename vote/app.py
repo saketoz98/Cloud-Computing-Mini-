@@ -11,6 +11,26 @@ hostname = socket.gethostname()
 
 app = Flask(__name__)
 
+questions = [{
+    'questionid': '1',
+    'question': "Who will win Lok Sabha Elections 2020?",
+    'option_a': "BJP",
+    'option_b': "CONGRESS",
+    'option_c': "AAP",
+    'option_d': "OTHERS",
+    'answer': ""
+},
+    {
+    'questionid': '2',
+    'question': "Who will be the next prime minister of India?",
+    'option_a': "Narendra Modi",
+    'option_b': "Rahul Gandhi",
+    'option_c': "Arvind Kejrival",
+    'option_d': "Rinku Sahu",
+    'answer': ""
+}
+]
+
 
 def get_redis():
     if not hasattr(g, 'redis'):
@@ -24,19 +44,22 @@ def hello():
     if not voter_id:
         voter_id = hex(random.getrandbits(64))[2:-1]
 
-    vote = None
+    vote = []
 
     if request.method == 'POST':
         redis = get_redis()
-        vote = request.form['vote']
-        data = json.dumps(
-            {'voter_id': voter_id, 'vote': vote, 'questionid': 1})
-        redis.rpush('votes', data)
 
+        # for i in range(len(questions)):
+        #     vote.append(request.form['vote'+str(i)])
+        # vote = request.form['vote']
+        answer1 = request.form.get('vote0')
+        answer2 = request.form.get('vote1')
+        data = json.dumps(
+            {'voter_id': voter_id, 'answer1': answer1, 'answer2': answer2, 'questionid': '1'})
+        redis.rpush('votes', data)
     resp = make_response(render_template(
         'index.html',
-        option_a=option_a,
-        option_b=option_b,
+        questions=questions,
         hostname=hostname,
         vote=vote,
     ))

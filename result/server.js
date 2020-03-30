@@ -47,7 +47,7 @@ async.retry(
 
 function getVotes(client) {
   client.query(
-    'SELECT vote1, questionid, COUNT(id) AS count FROM votes GROUP BY vote1, questionid ',
+    'SELECT answer1, questionid1, questionid2, answer2, id FROM votes ',
     [],
     function(err, result) {
       if (err) {
@@ -57,7 +57,7 @@ function getVotes(client) {
         console.log(result);
 
         var votes = collectVotesFromResult(result);
-        console.log(votes);
+        // console.log(votes);
 
         io.sockets.emit('scores', JSON.stringify(votes));
       }
@@ -70,10 +70,26 @@ function getVotes(client) {
 }
 
 function collectVotesFromResult(result) {
-  var votes = { a: 0, b: 0, c: 0, d: 0 };
+  // var votes = { a: 0, b: 0, c: 0, d: 0 };
+  var votes = {
+    questionid1: {
+      a: 0,
+      b: 0,
+      c: 0,
+      d: 0
+    },
+    questionid2: {
+      a: 0,
+      b: 0,
+      c: 0,
+      d: 0
+    }
+  };
 
   result.rows.forEach(function(row) {
-    votes[row.vote1] = parseInt(row.count);
+    // votes[row.answer1] = parseInt(row.count);
+    votes['questionid1'][row.answer1] += 1;
+    votes['questionid2'][row.answer2] += 1;
   });
 
   return votes;

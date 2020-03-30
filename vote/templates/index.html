@@ -171,22 +171,21 @@
   <body>
     <div id="content-container">
       <div id="content-container-center">
-        <h3>Lok Sabha Election !</h3>
         <form id="choice" name="form" method="POST" action="/">
-          <button id="a" type="submit" name="vote" class="a" value="a">
-            BJP
-          </button>
-          <button id="b" type="submit" name="vote" class="b" value="b">
-            CONGRESS
-          </button>
-          <button id="c" type="submit" name="vote" class="c" value="c">
-            NCP
-          </button>
-          <button id="d" type="submit" name="vote" class="d" value="d">
-            JANTA PARTY
-          </button>
+          {%for i in range(questions|length)%}
+          <h3>
+            {{ questions[i]['questionid'] }}. {{ questions[i]['question'] }}
+          </h3>
+          <select name="vote{{ i }}" class="selectpicker form-control">
+            <option value="a">{{ questions[i]['option_a'] }}</option>
+            <option value="b">{{ questions[i]['option_b'] }}</option>
+            <option value="c">{{ questions[i]['option_c'] }}</option>
+            <option value="d">{{ questions[i]['option_d'] }}</option>
+          </select>
+
+          {%endfor%}
+          <button type="submit" class="btn btn-default">submit</button>
         </form>
-        <div id="hostname">Processed by container ID {{ hostname }}</div>
       </div>
     </div>
     <script
